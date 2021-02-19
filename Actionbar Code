@@ -1,0 +1,73 @@
+on join:
+	while player is online:
+		loop {actionbar::animations::*}:
+			set action bar of player to coloured "%loop-value%"
+			loop {actionbar::waittime} times:
+				wait 1 tick
+		wait 1 tick
+command /actionbar [<text>] [<text>]:
+	permission: actionbar.op
+	trigger:
+		if arg 1 is not set:
+			message "{@P} &a/actionbar add (text) &6- add an animation."
+			message "{@P} &a/actionbar remove (text) &6- remove an animation."
+			message "{@P} &a/actionbar set (number) &6- set the wait time (in ticks)."
+			message "{@P} &a/actionbar reset &6- reset all animations."
+			message "{@P} &a/actionbar list (ani/save) &6- list either all animations (ani) or all save files (save)."
+			message "{@P} &a/actionbar save (text) &6- save the current animations."
+			message "{@P} &a/actionbar load (text) &6- load a save file."
+		else if arg 1 is "add":
+			if arg 2 is set:
+				add "%arg-2%" to {actionbar::animations::*}
+				message "{@P} &aAdded animation."
+			else:
+				message "{@P} {@ERROR}"
+		else if arg 1 is "remove":
+			if arg 2 is set:
+				remove "%arg-2%" from {actionbar::animations::*}
+				message "{@P} &aRemoved animation."
+			else:
+				message "{@P} {@ERROR}"
+		else if arg 1 is "set":
+			if arg 2 is set:
+				set {actionbar::waittime} to "%arg-2%" parsed as integer
+				message "{@P} &aSet wait time to %arg-2% ticks."
+			else:
+				message "{@P} {@ERROR}"
+		else if arg 1 is "reset":
+			delete {actionbar::animations::*}
+			send "{@P} &aReset animations."
+		else if arg 1 is "list":
+			if arg 2 is set:
+				if arg 2 is "ani":
+					send "{@P} &6The list of all animations are below."
+					send "&6[&aAnimations&6]"
+					loop {actionbar::animations::*}:
+						send "&7%loop-value%"
+				else if arg 2 is "save":
+					send "{@P} &6The list of all save files are below."
+					send "&6[&aSaveFiles&6]"
+					loop {actionbar::savefiles::*}:
+						send "&7%loop-value%"
+		else if arg 1 is "save":
+			if arg 2 is set:
+				if {saveani::%arg-2%::*} is set:
+					message "{@P} &cThe save file you have entered already exists, please enter a different name."
+					stop
+				else:
+					add arg-2 to {actionbar::savefiles::*}
+					loop {actionbar::animations::*}:
+						add loop-value to {saveani::%arg-2%::*}
+					message "{@P} &aSaved all current active animations."
+			else:
+				message "{@P} {@ERROR}"
+		else if arg 1 is "load":
+			if arg 2 is set:
+				if {saveani::%arg-2%::*} is set:
+					delete {actionbar::animations::*}
+					loop {saveani::%arg-2%::*}:
+						add loop-value to {actionbar::animations::*}
+					message "{@P} &aSuccessfully loaded save file."
+				else:
+					message "{@P} &cThe save file you are trying to load does not exist."
+          stop
